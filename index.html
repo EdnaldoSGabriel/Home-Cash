@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<title>Home Cash — Gestão Financeira Doméstica</title>
+<meta name="description" content="Controle receitas, despesas, Ticket Alimentação, poupança e lista de mercado da sua casa.">
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#14181C">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Home Cash">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ===================== TOPO ===================== -->
+  <header class="topbar">
+    <div class="topbar-brand">
+      <span class="brand-mark">HC</span>
+      <span class="brand-name">Home Cash</span>
+    </div>
+    <div class="month-switch">
+      <button id="btnMonthPrev" class="icon-btn" aria-label="Mês anterior">‹</button>
+      <button id="btnMonthLabel" class="month-label" aria-label="Escolher mês">setembro / 2026</button>
+      <button id="btnMonthNext" class="icon-btn" aria-label="Próximo mês">›</button>
+    </div>
+  </header>
+
+  <main class="screens">
+
+    <!-- ===================== INÍCIO / DASHBOARD ===================== -->
+    <section id="screen-inicio" class="screen active">
+
+      <div class="hero-balance">
+        <span class="hero-balance-label">saldo livre do mês</span>
+        <span id="heroSaldoLivre" class="hero-balance-value">R$ 0,00</span>
+        <div class="hero-balance-sub">
+          <span id="heroReceita" class="hero-chip receita">+ R$ 0,00 receitas</span>
+          <span id="heroDespesa" class="hero-chip despesa">– R$ 0,00 gastos</span>
+        </div>
+      </div>
+
+      <div class="stat-row">
+        <button class="stat-block" data-goto="poupanca">
+          <span class="stat-icon">◆</span>
+          <span class="stat-text">
+            <span class="stat-label">Poupança</span>
+            <span id="statPoupanca" class="stat-value">R$ 0,00</span>
+          </span>
+        </button>
+        <button class="stat-block" data-goto="mercado">
+          <span class="stat-icon">▤</span>
+          <span class="stat-text">
+            <span class="stat-label">Ticket Alimentação</span>
+            <span id="statTA" class="stat-value">R$ 0,00</span>
+          </span>
+        </button>
+      </div>
+
+      <div class="section-block">
+        <div class="section-heading">
+          <h2>Últimos lançamentos</h2>
+          <button class="link-btn" data-goto="extrato">ver extrato</button>
+        </div>
+        <ul id="listaRecentes" class="txn-list"></ul>
+        <p id="vazioRecentes" class="empty-hint" hidden>Nenhum lançamento ainda. Toque em “+” para começar.</p>
+      </div>
+
+      <div class="section-block">
+        <div class="section-heading">
+          <h2>Comparado ao mês anterior</h2>
+        </div>
+        <ul id="listaComparativo" class="compare-list"></ul>
+        <p id="vazioComparativo" class="empty-hint" hidden>Sem dados suficientes para comparar ainda.</p>
+      </div>
+
+    </section>
+
+    <!-- ===================== EXTRATO ===================== -->
+    <section id="screen-extrato" class="screen">
+      <div class="screen-header">
+        <h1>Extrato</h1>
+      </div>
+
+      <div class="filter-row" id="filtrosExtrato">
+        <button class="filter-chip active" data-filter="todos">Geral</button>
+        <button class="filter-chip" data-filter="receita">Receitas</button>
+        <button class="filter-chip" data-filter="despesa">Gastos</button>
+        <button class="filter-chip" data-filter="ta">Ticket Alim.</button>
+      </div>
+
+      <ul id="listaExtrato" class="txn-list txn-list--full"></ul>
+      <p id="vazioExtrato" class="empty-hint" hidden>Nada por aqui neste filtro.</p>
+    </section>
+
+    <!-- ===================== MERCADO ===================== -->
+    <section id="screen-mercado" class="screen">
+      <div class="screen-header">
+        <h1>Mercado</h1>
+        <button id="btnNovaLista" class="pill-btn">Nova lista</button>
+      </div>
+
+      <div id="mercadoSemLista" class="empty-state" hidden>
+        <p>Nenhuma lista para este mês ainda.</p>
+        <button class="pill-btn" data-action="nova-lista">Criar lista de compras</button>
+      </div>
+
+      <div id="mercadoComLista" hidden>
+        <div class="market-card">
+          <div class="market-card-top">
+            <h2 id="listaNome">Lista de Mercado</h2>
+            <span id="listaStatus" class="tag-status">em montagem</span>
+          </div>
+          <div class="market-total">
+            <span>Total</span>
+            <strong id="listaTotal">R$ 0,00</strong>
+          </div>
+        </div>
+
+        <div class="market-actions" id="acoesPreCompra">
+          <button id="btnAddItem" class="pill-btn pill-btn--ghost">+ item</button>
+          <button id="btnFinalizarLista" class="pill-btn">Finalizar lista</button>
+        </div>
+
+        <div class="market-actions" id="acoesCompra" hidden>
+          <button id="btnScanner" class="pill-btn pill-btn--ghost">◎ escanear código</button>
+          <button id="btnAddItemCompra" class="pill-btn pill-btn--ghost">+ item</button>
+        </div>
+
+        <ul id="listaItens" class="market-items"></ul>
+
+        <button id="btnFinalizarCompra" class="pill-btn pill-btn--full" hidden>Finalizar compra</button>
+      </div>
+
+      <div class="section-block">
+        <div class="section-heading">
+          <h2>Listas anteriores</h2>
+        </div>
+        <ul id="listaHistoricoListas" class="history-list"></ul>
+        <p id="vazioHistoricoListas" class="empty-hint" hidden>Ainda não há listas de outros meses.</p>
+      </div>
+    </section>
+
+    <!-- ===================== RELATÓRIOS ===================== -->
+    <section id="screen-relatorios" class="screen">
+      <div class="screen-header">
+        <h1>Relatórios</h1>
+      </div>
+
+      <div class="report-card">
+        <h2>Receitas × Despesas</h2>
+        <div class="chart-wrap"><canvas id="chartReceitaDespesa"></canvas></div>
+      </div>
+
+      <div class="report-card">
+        <h2>Gastos por categoria</h2>
+        <div class="chart-wrap"><canvas id="chartCategorias"></canvas></div>
+      </div>
+
+      <div class="report-card">
+        <h2>Ticket Alimentação</h2>
+        <div id="reportTA" class="ta-report"></div>
+      </div>
+
+      <div class="report-card">
+        <h2>Comparar dois meses</h2>
+        <div class="compare-selects">
+          <select id="selMesA"></select>
+          <span>vs</span>
+          <select id="selMesB"></select>
+        </div>
+        <div id="resultadoComparacao" class="compare-result"></div>
+      </div>
+    </section>
+
+    <!-- ===================== POUPANÇA ===================== -->
+    <section id="screen-poupanca" class="screen">
+      <div class="screen-header">
+        <h1>Poupança</h1>
+      </div>
+
+      <div class="hero-balance hero-balance--savings">
+        <span class="hero-balance-label">saldo total guardado</span>
+        <span id="poupancaSaldoTotal" class="hero-balance-value">R$ 0,00</span>
+      </div>
+
+      <button id="btnTransferirPoupanca" class="pill-btn pill-btn--full">Transferir para a poupança</button>
+
+      <div class="section-block">
+        <div class="section-heading"><h2>Histórico de transferências</h2></div>
+        <ul id="listaPoupanca" class="txn-list"></ul>
+        <p id="vazioPoupanca" class="empty-hint" hidden>Nenhuma transferência ainda.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <button id="btnAdd" class="fab" aria-label="Adicionar lançamento">+</button>
+
+  <nav class="bottom-nav">
+    <button class="nav-btn active" data-screen="inicio">
+      <span class="nav-icon">⌂</span><span>Início</span>
+    </button>
+    <button class="nav-btn" data-screen="extrato">
+      <span class="nav-icon">≡</span><span>Extrato</span>
+    </button>
+    <button class="nav-btn" data-screen="mercado">
+      <span class="nav-icon">▤</span><span>Mercado</span>
+    </button>
+    <button class="nav-btn" data-screen="relatorios">
+      <span class="nav-icon">◔</span><span>Relatórios</span>
+    </button>
+    <button class="nav-btn" data-screen="poupanca">
+      <span class="nav-icon">◆</span><span>Poupança</span>
+    </button>
+  </nav>
+
+</div>
+
+<!-- ===================== MODAL: NOVA TRANSAÇÃO ===================== -->
+<div id="modalTransacao" class="modal-overlay" hidden>
+  <div class="modal-sheet">
+    <div class="modal-head">
+      <h2 id="modalTransacaoTitulo">Novo lançamento</h2>
+      <button class="icon-btn" data-close-modal>×</button>
+    </div>
+
+    <div class="segmented" id="segTipo">
+      <button type="button" class="segmented-btn active" data-tipo="receita">Receita</button>
+      <button type="button" class="segmented-btn" data-tipo="despesa">Gasto</button>
+    </div>
+
+    <form id="formTransacao" class="form">
+      <label class="field">
+        <span>Valor</span>
+        <input type="number" id="fValor" inputmode="decimal" step="0.01" min="0" placeholder="0,00" required>
+      </label>
+
+      <label class="field">
+        <span>Descrição</span>
+        <input type="text" id="fDescricao" placeholder="Ex: Salário, Conta de luz…" required>
+      </label>
+
+      <label class="field">
+        <span>Categoria / Origem</span>
+        <select id="fCategoria"></select>
+      </label>
+
+      <label class="field">
+        <span>Data</span>
+        <input type="date" id="fData" required>
+      </label>
+
+      <label class="field field--check" id="campoTA">
+        <input type="checkbox" id="fIsTA">
+        <span>Ticket Alimentação (não entra na receita/despesa da casa)</span>
+      </label>
+
+      <button type="submit" class="pill-btn pill-btn--full">Salvar</button>
+      <button type="button" id="btnExcluirTransacao" class="pill-btn pill-btn--danger pill-btn--full" hidden>Excluir</button>
+    </form>
+  </div>
+</div>
+
+<!-- ===================== MODAL: TRANSFERIR POUPANÇA ===================== -->
+<div id="modalPoupanca" class="modal-overlay" hidden>
+  <div class="modal-sheet">
+    <div class="modal-head">
+      <h2>Transferir para poupança</h2>
+      <button class="icon-btn" data-close-modal>×</button>
+    </div>
+    <form id="formPoupanca" class="form">
+      <label class="field">
+        <span>Valor a guardar</span>
+        <input type="number" id="pValor" inputmode="decimal" step="0.01" min="0" placeholder="0,00" required>
+      </label>
+      <label class="field">
+        <span>Descrição (opcional)</span>
+        <input type="text" id="pDescricao" placeholder="Ex: Reserva de emergência">
+      </label>
+      <p class="field-hint">Esse valor será descontado do saldo livre da receita deste mês.</p>
+      <button type="submit" class="pill-btn pill-btn--full">Transferir</button>
+    </form>
+  </div>
+</div>
+
+<!-- ===================== MODAL: NOVA LISTA ===================== -->
+<div id="modalNovaLista" class="modal-overlay" hidden>
+  <div class="modal-sheet">
+    <div class="modal-head">
+      <h2>Nova lista de mercado</h2>
+      <button class="icon-btn" data-close-modal>×</button>
+    </div>
+    <form id="formNovaLista" class="form">
+      <label class="field">
+        <span>Nome da lista</span>
+        <input type="text" id="lNome" placeholder="Ex: Lista de Mercado - Setembro" required>
+      </label>
+      <button type="submit" class="pill-btn pill-btn--full">Criar lista</button>
+    </form>
+  </div>
+</div>
+
+<!-- ===================== MODAL: ITEM DA LISTA ===================== -->
+<div id="modalItem" class="modal-overlay" hidden>
+  <div class="modal-sheet">
+    <div class="modal-head">
+      <h2 id="modalItemTitulo">Adicionar item</h2>
+      <button class="icon-btn" data-close-modal>×</button>
+    </div>
+    <form id="formItem" class="form">
+      <input type="hidden" id="iId">
+      <input type="hidden" id="iBarcode">
+      <label class="field">
+        <span>Nome do item</span>
+        <input type="text" id="iNome" placeholder="Ex: Arroz 5kg" required>
+      </label>
+      <label class="field">
+        <span>Marca</span>
+        <input type="text" id="iMarca" placeholder="Opcional">
+      </label>
+      <label class="field">
+        <span>Quantidade</span>
+        <input type="number" id="iQtd" min="1" step="1" value="1">
+      </label>
+      <label class="field" id="campoPreco" hidden>
+        <span>Preço unitário</span>
+        <input type="number" id="iPreco" inputmode="decimal" step="0.01" min="0" placeholder="0,00">
+      </label>
+      <button type="submit" class="pill-btn pill-btn--full">Salvar item</button>
+      <button type="button" id="btnExcluirItem" class="pill-btn pill-btn--danger pill-btn--full" hidden>Remover item</button>
+    </form>
+  </div>
+</div>
+
+<!-- ===================== MODAL: SCANNER ===================== -->
+<div id="modalScanner" class="modal-overlay" hidden>
+  <div class="modal-sheet modal-sheet--scanner">
+    <div class="modal-head">
+      <h2>Escanear código de barras</h2>
+      <button class="icon-btn" data-close-modal>×</button>
+    </div>
+    <div id="readerScanner"></div>
+    <p id="scannerStatus" class="field-hint">Aponte a câmera para o código de barras do produto.</p>
+  </div>
+</div>
+
+<!-- ===================== MODAL: SELECIONAR MÊS ===================== -->
+<div id="modalMes" class="modal-overlay" hidden>
+  <div class="modal-sheet">
+    <div class="modal-head">
+      <h2>Escolher mês</h2>
+      <button class="icon-btn" data-close-modal>×</button>
+    </div>
+    <ul id="listaMeses" class="month-list"></ul>
+  </div>
+</div>
+
+<div id="toast" class="toast" hidden></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
